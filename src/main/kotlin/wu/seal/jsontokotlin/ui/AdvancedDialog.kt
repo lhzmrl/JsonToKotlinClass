@@ -1,8 +1,11 @@
 package wu.seal.jsontokotlin.ui
 
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.util.ui.JBDimension
+import extensions.wu.seal.ClassNameSuffixSupport
 import wu.seal.jsontokotlin.PropertyGlobalMode
 import wu.seal.jsontokotlin.model.ConfigManager
 import wu.seal.jsontokotlin.model.DefaultValueStrategy
@@ -19,6 +22,7 @@ import javax.swing.JComponent
 
 class AdvancedDialog(canBeParent: Boolean) : DialogWrapper(canBeParent) {
 
+    private val gson = Gson()
     lateinit var jbTabbedPane: JBTabbedPane
     private var advancedPropertyTab: AdvancedPropertyTab? = null
     private var advancedAnnotationTab: AdvancedAnnotationTab? = null
@@ -97,11 +101,19 @@ class AdvancedDialog(canBeParent: Boolean) : DialogWrapper(canBeParent) {
                 ConfigManager.defaultValueStrategy = DefaultValueStrategy.AllowNull
                 ConfigManager.targetJsonConverterLib = TargetJsonConverter.None
                 ConfigManager.isInnerClassModel = false
+                setConfig(ClassNameSuffixSupport.suffixKeyEnable, "true")
+                setConfig(ClassNameSuffixSupport.suffixKey, "")
             }
             else -> {
 
             }
         }
+    }
+
+    private fun setConfig(key: String, value: String) {
+        val configs = gson.fromJson(ConfigManager.extensionsConfig, JsonObject::class.java) ?: JsonObject()
+        configs.addProperty(key, value)
+        ConfigManager.extensionsConfig = gson.toJson(configs)
     }
 
 }

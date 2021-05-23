@@ -88,14 +88,6 @@ class GenerateKotlinFileAction : AnAction("Kotlin data class File from JSON") {
         val dataClassAfterApplyInterceptor =
             kotlinClass.applyInterceptors(InterceptorManager.getEnabledKotlinDataClassInterceptors())
         if (ConfigManager.isInnerClassModel) {
-            KotlinClassFileGenerator().generateSingleKotlinFileWithMultipleClass(
-                packageDeclare,
-                dataClassAfterApplyInterceptor,
-                project,
-                psiFileFactory,
-                directory
-            )
-        } else {
             KotlinClassFileGenerator().generateSingleKotlinClassFile(
                 packageDeclare,
                 dataClassAfterApplyInterceptor,
@@ -103,6 +95,23 @@ class GenerateKotlinFileAction : AnAction("Kotlin data class File from JSON") {
                 psiFileFactory,
                 directory
             )
+        } else {
+            if(ConfigManager.mode == PropertyGlobalMode.Ford) {
+                KotlinClassFileGenerator().generateFordClasses(
+                    dataClassAfterApplyInterceptor,
+                    project,
+                    psiFileFactory,
+                    directory
+                )
+            } else {
+                KotlinClassFileGenerator().generateSingleKotlinFileWithMultipleClass(
+                    packageDeclare,
+                    dataClassAfterApplyInterceptor,
+                    project,
+                    psiFileFactory,
+                    directory
+                )
+            }
         }
     }
 }

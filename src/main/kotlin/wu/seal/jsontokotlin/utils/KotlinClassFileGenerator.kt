@@ -1,12 +1,21 @@
 package wu.seal.jsontokotlin.utils
 
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFileFactory
+import com.intellij.psi.impl.file.PsiDirectoryFactory
+import extensions.lee.leo.ClassNameFordSuffixSupport
+import extensions.wu.seal.ClassNameSuffixSupport
 import wu.seal.jsontokotlin.model.classscodestruct.KotlinClass
 import wu.seal.jsontokotlin.filetype.KotlinFileType
+import wu.seal.jsontokotlin.interceptor.IKotlinClassInterceptor
+import wu.seal.jsontokotlin.model.ConfigManager
 
 class KotlinClassFileGenerator {
+
+    private val gson = Gson()
 
     fun generateSingleKotlinClassFile(
             packageDeclare: String,
@@ -63,6 +72,75 @@ class KotlinClassFileGenerator {
             project,
             psiFileFactory,
             directory
+        )
+        val notifyMessage = "Kotlin Data Class file generated successful"
+        showNotify(notifyMessage, project)
+    }
+
+    fun generateFordClasses(
+        kotlinClass: KotlinClass,
+        project: Project?,
+        psiFileFactory: PsiFileFactory,
+        directory: PsiDirectory
+    ) {
+        generateFordClasses(kotlinClass, project, psiFileFactory, directory, "repository/response", "Response")
+        generateFordClasses(kotlinClass, project, psiFileFactory, directory, "domain", "Entity")
+        generateFordClasses(kotlinClass, project, psiFileFactory, directory, "component/models", "DTO")
+    }
+
+    private fun generateFordClasses(
+        kotlinClass: KotlinClass,
+        project: Project?,
+        psiFileFactory: PsiFileFactory,
+        directory: PsiDirectory,
+        subDir: String,
+        suffix: String
+    ) {
+        // repository/response/**Response.kt
+        // domain/**Entity.kt
+        // component/models/**DTO.kt
+        val directoryFactory = PsiDirectoryFactory.getInstance(directory.project)
+        val splitDir = subDir.split("/")
+        var subDirectory = directory
+        for (dir in splitDir) {
+            var isExist = false
+            subDirectory.virtualFile.children.forEach {
+                if (it.isDirectory && it.name == dir) {
+                    isExist = true
+                    subDirectory = directoryFactory.createDirectory(it)
+                    return@forEach
+                }
+            }
+            if (!isExist) {
+                subDirectory = directoryFactory.createDirectory(subDirectory.virtualFile.createChildDirectory(this, dir))
+            }
+        }
+        val packageName = directoryFactory.getQualifiedName(subDirectory, false)
+        val packageDeclare = if (packageName.isNotEmpty()) "package $packageName" else ""
+        val fileNamesWithoutSuffix = currentDirExistsFileNamesWithoutKTSuffix(subDirectory)
+        var kotlinClassForGenerateFile = kotlinClass
+        while (fileNamesWithoutSuffix.contains(kotlinClass.name)) {
+            kotlinClassForGenerateFile =
+                kotlinClassForGenerateFile.rename(newName = kotlinClassForGenerateFile.name + "X")
+        }
+        setConfig(ClassNameSuffixSupport.suffixKey, suffix)
+        val existsKotlinFileNames = IgnoreCaseStringSet().also { it.addAll(fileNamesWithoutSuffix) }
+
+        val splitClasses = kotlinClass.resolveNameConflicts(existsKotlinFileNames).getAllModifiableClassesRecursivelyIncludeSelf()
+
+        val classCodeContentSb = StringBuilder()
+        splitClasses.forEach { splitDataClass ->
+            classCodeContentSb.append(splitDataClass.getOnlyCurrentCode())
+            classCodeContentSb.append("\n\n")
+        }
+
+        generateKotlinClassFile(
+            kotlinClassForGenerateFile.name,
+            packageDeclare,
+            classCodeContentSb.toString(),
+            project,
+            psiFileFactory,
+            subDirectory
         )
         val notifyMessage = "Kotlin Data Class file generated successful"
         showNotify(notifyMessage, project)
@@ -144,6 +222,12 @@ class KotlinClassFileGenerator {
                     psiFileFactory.createFileFromText("${fileName.trim('`')}.kt", KotlinFileType(), kotlinFileContent)
             directory.add(file)
         }
+    }
+
+    private fun setConfig(key: String, value: String) {
+        val configs = gson.fromJson(ConfigManager.extensionsConfig, JsonObject::class.java) ?: JsonObject()
+        configs.addProperty(key, value)
+        ConfigManager.extensionsConfig = gson.toJson(configs)
     }
 
 }
