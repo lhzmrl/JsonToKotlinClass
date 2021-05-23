@@ -1,6 +1,7 @@
 package wu.seal.jsontokotlin.model
 
 import com.intellij.ide.util.PropertiesComponent
+import wu.seal.jsontokotlin.PropertyGlobalMode
 import wu.seal.jsontokotlin.test.TestConfig
 import wu.seal.jsontokotlin.test.TestConfig.isTestModel
 
@@ -23,6 +24,9 @@ interface IConfigManager {
 
     private val IS_ORDER_BY_ALPHABETICAL: String
         get() = "is_order_by_alphabetical"
+
+    private val PROPERTY_TYPE_GLOBAL_MODE: String
+        get() = "jsontokotlin_is_property_property_global_mode_key"
 
     private val PROPERTY_TYPE_STRATEGY_KEY: String
         get() = "jsontokotlin_is_property_property_type_strategy_key"
@@ -49,6 +53,16 @@ interface IConfigManager {
     private val INNER_CLASS_MODEL_KEY: String
         get() = "jsontokotlin_inner_class_model_key"
 
+    var mode: PropertyGlobalMode
+        get() = if (isTestModel) TestConfig.propertyGlobalMode else PropertyGlobalMode.valueOf(
+            PropertiesComponent.getInstance().getValue(
+                PROPERTY_TYPE_GLOBAL_MODE,
+                PropertyGlobalMode.Custom.name
+            )
+        )
+        set(value) = if (isTestModel) {
+            TestConfig.propertyGlobalMode = value
+        } else PropertiesComponent.getInstance().setValue(PROPERTY_TYPE_GLOBAL_MODE, value.name)
 
     var isPropertiesVar: Boolean
         get() = if (isTestModel) TestConfig.isPropertiesVar else PropertiesComponent.getInstance().isTrueValue(

@@ -1,5 +1,6 @@
 package wu.seal.jsontokotlin.test
 
+import wu.seal.jsontokotlin.PropertyGlobalMode
 import wu.seal.jsontokotlin.interceptor.annotations.gson.AddGsonAnnotationClassImportDeclarationInterceptor
 import wu.seal.jsontokotlin.model.DefaultValueStrategy
 import wu.seal.jsontokotlin.model.PropertyTypeStrategy
@@ -22,6 +23,7 @@ object TestConfig {
     var isOrderByAlphabetical = false
     var isPropertiesVar = false
     var targetJsonConvertLib = TargetJsonConverter.Gson
+    var propertyGlobalMode = PropertyGlobalMode.Ford
     var propertyTypeStrategy = PropertyTypeStrategy.NotNullable
     var defaultValueStrategy = DefaultValueStrategy.AvoidNull
     var isNestedClassModel = true
