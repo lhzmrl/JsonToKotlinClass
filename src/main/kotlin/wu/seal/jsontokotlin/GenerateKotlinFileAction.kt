@@ -89,7 +89,7 @@ class GenerateKotlinFileAction : AnAction("Kotlin data class File from JSON") {
             kotlinClass.applyInterceptors(InterceptorManager.getEnabledKotlinDataClassInterceptors())
         if (ConfigManager.isInnerClassModel) {
 
-            KotlinClassFileGenerator().generateSingleKotlinClassFile(
+            KotlinClassFileGenerator().generateSingleKotlinFileWithMultipleClass(
                 packageDeclare,
                 dataClassAfterApplyInterceptor,
                 project,

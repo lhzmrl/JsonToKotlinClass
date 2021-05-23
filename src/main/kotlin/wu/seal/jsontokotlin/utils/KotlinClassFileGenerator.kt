@@ -33,6 +33,41 @@ class KotlinClassFileGenerator {
         showNotify(notifyMessage, project)
     }
 
+    fun generateSingleKotlinFileWithMultipleClass(
+        packageDeclare: String,
+        kotlinClass: KotlinClass,
+        project: Project?,
+        psiFileFactory: PsiFileFactory,
+        directory: PsiDirectory
+    ) {
+        val fileNamesWithoutSuffix = currentDirExistsFileNamesWithoutKTSuffix(directory)
+        var kotlinClassForGenerateFile = kotlinClass
+        while (fileNamesWithoutSuffix.contains(kotlinClass.name)) {
+            kotlinClassForGenerateFile =
+                kotlinClassForGenerateFile.rename(newName = kotlinClassForGenerateFile.name + "X")
+        }
+
+        val existsKotlinFileNames = IgnoreCaseStringSet().also { it.addAll(fileNamesWithoutSuffix) }
+        val splitClasses = kotlinClass.resolveNameConflicts(existsKotlinFileNames).getAllModifiableClassesRecursivelyIncludeSelf()
+
+        val classCodeContentSb = StringBuilder()
+        splitClasses.forEach { splitDataClass ->
+            classCodeContentSb.append(splitDataClass.getOnlyCurrentCode())
+            classCodeContentSb.append("\n\n")
+        }
+
+        generateKotlinClassFile(
+            kotlinClassForGenerateFile.name,
+            packageDeclare,
+            classCodeContentSb.toString(),
+            project,
+            psiFileFactory,
+            directory
+        )
+        val notifyMessage = "Kotlin Data Class file generated successful"
+        showNotify(notifyMessage, project)
+    }
+
     fun generateMultipleKotlinClassFiles(
             kotlinClass: KotlinClass,
             packageDeclare: String,
