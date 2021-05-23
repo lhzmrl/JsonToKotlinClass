@@ -5,5 +5,5 @@ package wu.seal.jsontokotlin.model
  * Created by Seal.Wu on 2018/4/20.
  */
 enum class PropertyTypeStrategy {
-    NotNullable, Nullable, AutoDeterMineNullableOrNot
+    NotNullable, Nullable, AutoDeterMineNullableOrNot, JavaStyle
 }

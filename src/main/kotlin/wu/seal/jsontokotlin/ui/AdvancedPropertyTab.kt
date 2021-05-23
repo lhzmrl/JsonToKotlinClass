@@ -30,6 +30,8 @@ class AdvancedPropertyTab(isDoubleBuffered: Boolean) : JPanel(BorderLayout(), is
                             { ConfigManager.propertyTypeStrategy = PropertyTypeStrategy.Nullable })
                     jRadioButton("Auto Determine Nullable Or Not From JSON Value", ConfigManager.propertyTypeStrategy == PropertyTypeStrategy.AutoDeterMineNullableOrNot,
                             { ConfigManager.propertyTypeStrategy = PropertyTypeStrategy.AutoDeterMineNullableOrNot })
+                    jRadioButton("Java style", ConfigManager.propertyTypeStrategy == PropertyTypeStrategy.JavaStyle,
+                        { ConfigManager.propertyTypeStrategy = PropertyTypeStrategy.JavaStyle })
                 }
                 jLine()
                 jLabel("Default Value Strategy")

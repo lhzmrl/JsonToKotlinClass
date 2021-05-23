@@ -77,8 +77,22 @@ fun getOutType(rawType: String, value: Any?): String {
                 rawType
             }
         }
-        else -> {
+        (PropertyTypeStrategy.NotNullable) -> {
             rawType.replace("?", "")
+        }
+        (PropertyTypeStrategy.JavaStyle) -> {
+            return when(rawType) {
+                "Int", "Long", "Double", "Boolean" -> {
+                    rawType
+                }
+                else -> {
+                    rawType.plus("?")
+                }
+            }
+
+        }
+        else -> {
+            throw RuntimeException("Please cover all case, now it is ${ConfigManager.propertyTypeStrategy}")
         }
     }
 
