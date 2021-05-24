@@ -152,14 +152,30 @@ class KotlinClassFileGenerator {
             is DataClass -> {
                 val newProperties = ArrayList<Property>()
                 kotlinClass.properties.forEach {
-                    if(!it.typeObject.modifiable) {
-                        newProperties.add(it)
+                    val typeObject = it.typeObject
+                    val newTypeObject = if(!typeObject.modifiable) {
+                        if(typeObject is GenericListClass) {
+                            if(typeObject.generic.modifiable) {
+                                val newGeneric = typeObject.generic.rename(kotlinClass.name + getJsonObjectType(it.name) + "Item")
+                                GenericListClass(makeProgressiveName(newGeneric))
+                            } else {
+                                makeProgressiveName(typeObject.generic)
+                            }
+                        } else {
+                            makeProgressiveName(typeObject)
+                        }
                     } else {
-                        val newTypeObject = makeProgressiveName(it.typeObject.rename(kotlinClass.name + it.typeObject.name))
-                        newProperties.add(it.copy(typeObject = newTypeObject))
+                        makeProgressiveName(typeObject.rename(kotlinClass.name + typeObject.name))
                     }
+                    newProperties.add(it.copy(typeObject = newTypeObject))
                 }
                 kotlinClass.copy(properties = newProperties)
+            }
+            is GenericListClass -> {
+                kotlinClass
+            }
+            is ListClass -> {
+                kotlinClass
             }
             else -> {
                 kotlinClass
