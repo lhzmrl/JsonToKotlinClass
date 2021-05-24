@@ -101,7 +101,7 @@ class AdvancedDialog(canBeParent: Boolean) : DialogWrapper(canBeParent) {
                 ConfigManager.defaultValueStrategy = DefaultValueStrategy.AllowNull
                 ConfigManager.targetJsonConverterLib = TargetJsonConverter.None
                 ConfigManager.isInnerClassModel = false
-                setConfig(ClassNameSuffixSupport.suffixKeyEnable, "true")
+                setConfig(ClassNameSuffixSupport.suffixKeyEnable, "false")
                 setConfig(ClassNameSuffixSupport.suffixKey, "")
             }
             else -> {

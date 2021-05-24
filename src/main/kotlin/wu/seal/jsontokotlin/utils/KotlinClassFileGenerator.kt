@@ -7,11 +7,9 @@ import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.impl.file.PsiDirectoryFactory
 import extensions.lee.leo.ClassNameFordSuffixSupport
-import extensions.wu.seal.ClassNameSuffixSupport
-import wu.seal.jsontokotlin.model.classscodestruct.KotlinClass
 import wu.seal.jsontokotlin.filetype.KotlinFileType
-import wu.seal.jsontokotlin.interceptor.IKotlinClassInterceptor
 import wu.seal.jsontokotlin.model.ConfigManager
+import wu.seal.jsontokotlin.model.classscodestruct.*
 
 class KotlinClassFileGenerator {
 
@@ -86,6 +84,8 @@ class KotlinClassFileGenerator {
         generateFordClasses(kotlinClass, project, psiFileFactory, directory, "repository/response", "Response")
         generateFordClasses(kotlinClass, project, psiFileFactory, directory, "domain", "Entity")
         generateFordClasses(kotlinClass, project, psiFileFactory, directory, "component/models", "DTO")
+        val notifyMessage = "Kotlin Data Class file generated successful"
+        showNotify(notifyMessage, project)
     }
 
     private fun generateFordClasses(
@@ -115,24 +115,27 @@ class KotlinClassFileGenerator {
                 subDirectory = directoryFactory.createDirectory(subDirectory.virtualFile.createChildDirectory(this, dir))
             }
         }
+
+        val renamedKotlinClass = makeProgressiveName(kotlinClass).applyInterceptor(ClassNameFordSuffixSupport(suffix))
         val packageName = directoryFactory.getQualifiedName(subDirectory, false)
         val packageDeclare = if (packageName.isNotEmpty()) "package $packageName" else ""
         val fileNamesWithoutSuffix = currentDirExistsFileNamesWithoutKTSuffix(subDirectory)
-        var kotlinClassForGenerateFile = kotlinClass
-        while (fileNamesWithoutSuffix.contains(kotlinClass.name)) {
+        var kotlinClassForGenerateFile = renamedKotlinClass
+        while (fileNamesWithoutSuffix.contains(renamedKotlinClass.name)) {
             kotlinClassForGenerateFile =
                 kotlinClassForGenerateFile.rename(newName = kotlinClassForGenerateFile.name + "X")
         }
-        setConfig(ClassNameSuffixSupport.suffixKey, suffix)
+
         val existsKotlinFileNames = IgnoreCaseStringSet().also { it.addAll(fileNamesWithoutSuffix) }
 
-        val splitClasses = kotlinClass.resolveNameConflicts(existsKotlinFileNames).getAllModifiableClassesRecursivelyIncludeSelf()
+        val splitClasses = renamedKotlinClass.resolveNameConflicts(existsKotlinFileNames).getAllModifiableClassesRecursivelyIncludeSelf()
 
         val classCodeContentSb = StringBuilder()
         splitClasses.forEach { splitDataClass ->
             classCodeContentSb.append(splitDataClass.getOnlyCurrentCode())
             classCodeContentSb.append("\n\n")
         }
+        classCodeContentSb.deleteCharAt(classCodeContentSb.lastIndex)
 
         generateKotlinClassFile(
             kotlinClassForGenerateFile.name,
@@ -142,8 +145,26 @@ class KotlinClassFileGenerator {
             psiFileFactory,
             subDirectory
         )
-        val notifyMessage = "Kotlin Data Class file generated successful"
-        showNotify(notifyMessage, project)
+    }
+
+    private fun makeProgressiveName(kotlinClass: KotlinClass): KotlinClass {
+        return when(kotlinClass) {
+            is DataClass -> {
+                val newProperties = ArrayList<Property>()
+                kotlinClass.properties.forEach {
+                    if(!it.typeObject.modifiable) {
+                        newProperties.add(it)
+                    } else {
+                        val newTypeObject = makeProgressiveName(it.typeObject.rename(kotlinClass.name + it.typeObject.name))
+                        newProperties.add(it.copy(typeObject = newTypeObject))
+                    }
+                }
+                kotlinClass.copy(properties = newProperties)
+            }
+            else -> {
+                kotlinClass
+            }
+        }
     }
 
     fun generateMultipleKotlinClassFiles(

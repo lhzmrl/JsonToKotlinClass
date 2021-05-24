@@ -6,15 +6,10 @@ import wu.seal.jsontokotlin.model.classscodestruct.KotlinClass
 import wu.seal.jsontokotlin.utils.getChildType
 import wu.seal.jsontokotlin.utils.getRawType
 
-class ClassNameFordSuffixSupport : IKotlinClassInterceptor<KotlinClass> {
-
-    companion object {
-        var SUFFIX = ""
-    }
+class ClassNameFordSuffixSupport(val suffix: String) : IKotlinClassInterceptor<KotlinClass> {
 
     override fun intercept(kotlinClass: KotlinClass): KotlinClass {
         return if (kotlinClass is DataClass) {
-            val suffix = SUFFIX
             val standTypes = listOf("Int", "Double", "Long", "String", "Boolean")
             val originName = kotlinClass.name
             val newPropertyTypes =
