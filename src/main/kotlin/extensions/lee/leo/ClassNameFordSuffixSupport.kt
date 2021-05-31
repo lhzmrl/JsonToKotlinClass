@@ -19,6 +19,9 @@ class ClassNameFordSuffixSupport(val suffix: String) : IKotlinClassInterceptor<K
                         it.type.isMapType() -> {
                             it.type//currently don't support map type
                         }
+                        it.type.isListType() -> {
+                            it.type//currently don't support map type
+                        }
                         standTypes.contains(rawSubType) -> it.type
                         else -> it.type.replace(rawSubType, rawSubType + suffix)
                     }
@@ -29,6 +32,9 @@ class ClassNameFordSuffixSupport(val suffix: String) : IKotlinClassInterceptor<K
                 when {
                     it.value.isEmpty() -> it.value
                     it.type.isMapType() -> {
+                        it.value//currently don't support map type
+                    }
+                    it.type.isListType() -> {
                         it.value//currently don't support map type
                     }
                     standTypes.contains(rawSubType) -> it.value
@@ -54,5 +60,10 @@ class ClassNameFordSuffixSupport(val suffix: String) : IKotlinClassInterceptor<K
     private fun String.isMapType(): Boolean {
 
         return matches(Regex("Map<.+,.+>"))
+    }
+
+    private fun String.isListType(): Boolean {
+
+        return matches(Regex("List<*>\\??"))
     }
 }
