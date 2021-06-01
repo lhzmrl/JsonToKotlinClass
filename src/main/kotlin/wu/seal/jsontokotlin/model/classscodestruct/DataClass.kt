@@ -85,4 +85,8 @@ data class DataClass(
     override fun getOnlyCurrentCode(): String {
         return codeBuilder.getOnlyCurrentCode()
     }
+
+    override fun getFactoryCode(target: String, source: String, from: String, to: String): String {
+        return codeBuilder.getFactoryCode(target, source, from, to)
+    }
 }

@@ -31,6 +31,10 @@ data class KotlinEnumCodeBuilder(
                 .append("\n}").toString()
     }
 
+    override fun getFactoryCode(target: String, source: String, from: String, to: String): String {
+        return ""
+    }
+
     private fun generateValues(): List<String> {
         val list = mutableListOf<String>()
         for (i in enum.indices) {

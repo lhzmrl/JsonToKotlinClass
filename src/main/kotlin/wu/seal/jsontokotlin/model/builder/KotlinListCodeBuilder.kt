@@ -36,4 +36,8 @@ ${referencedClasses.filter { it.modifiable }.joinToString("\n\n") { it.getCode()
             class $name : ArrayList<${generic.name}>()
         """.trimIndent()
     }
+
+    override fun getFactoryCode(target: String, source: String, from: String, to: String): String {
+        TODO("Not yet implemented, complete it when use it")
+    }
 }

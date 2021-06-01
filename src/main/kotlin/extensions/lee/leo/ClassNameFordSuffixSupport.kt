@@ -64,6 +64,6 @@ class ClassNameFordSuffixSupport(val suffix: String) : IKotlinClassInterceptor<K
 
     private fun String.isListType(): Boolean {
 
-        return matches(Regex("List<*>\\??"))
+        return matches(Regex("List<.*>\\??"))
     }
 }

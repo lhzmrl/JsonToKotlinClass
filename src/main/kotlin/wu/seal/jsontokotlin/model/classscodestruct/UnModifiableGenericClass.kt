@@ -10,5 +10,6 @@ abstract class UnModifiableGenericClass : GenericKotlinClass {
     override val modifiable: Boolean = false
     override fun getCode(): String = throw UnsupportedOperationException("Dont support this function called on unModifiable Class")
     override fun getOnlyCurrentCode(): String = throw UnsupportedOperationException("Dont support this function called on unModifiable Class")
+    override fun getFactoryCode(target: String, source: String, from: String, to: String) = throw UnsupportedOperationException("Dont support this function called on unModifiable Class")
     override fun rename(newName: String): KotlinClass = throw UnsupportedOperationException("Dont support this function called on unModifiable Class")
 }

@@ -21,6 +21,10 @@ data class EnumClass(
         return codeBuilder.getOnlyCurrentCode()
     }
 
+    override fun getFactoryCode(target: String, source: String, from: String, to: String): String {
+        return codeBuilder.getFactoryCode(target, source, from, to)
+    }
+
     override fun rename(newName: String): KotlinClass = copy(name = newName)
 
     override fun getCode(): String {

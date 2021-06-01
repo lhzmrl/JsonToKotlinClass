@@ -11,6 +11,7 @@ abstract class UnModifiableNoGenericClass : NoGenericKotlinClass {
     override val referencedClasses: List<KotlinClass> = listOf()
     override fun getCode() = throw UnsupportedOperationException("Dont support this function called on unModifiable Class")
     override fun getOnlyCurrentCode() = throw UnsupportedOperationException("Dont support this function called on unModifiable Class")
+    override fun getFactoryCode(target: String, source: String, from: String, to: String) = throw UnsupportedOperationException("Dont support this function called on unModifiable Class")
     override fun rename(newName: String) = throw UnsupportedOperationException("Dont support this function called on unModifiable Class")
     override fun replaceReferencedClasses(replaceRule: Map<KotlinClass, KotlinClass>): KotlinClass = throw UnsupportedOperationException("Dont support this function called on unModifiable Class")
 }

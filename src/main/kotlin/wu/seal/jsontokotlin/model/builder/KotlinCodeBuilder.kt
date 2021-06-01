@@ -68,6 +68,37 @@ data class KotlinCodeBuilder(
         return copy(properties = newProperties).getCode()
     }
 
+    override fun getFactoryCode(target: String, source: String, from: String, to: String): String {
+        val standTypes = listOf("Int", "Double", "Long", "String", "Boolean")
+        val codeBuilder = StringBuilder()
+        codeBuilder.append("$target = ${name + to}()").appendLine()
+        properties.filterNot { excludedProperties.contains(it.name) }.forEach { property ->
+            val rawSubType = getRawType(property.type)
+            if(standTypes.contains(rawSubType)) {
+                // TODO Enum类型也可以直接复制
+                codeBuilder.append("$target.${property.name} = $source.${property.name}").appendLine()
+                return@forEach
+            }
+            codeBuilder.append("if($source.${property.name} != null) {").appendLine()
+            if (rawSubType.matches(Regex("List<.*>\\??"))) {
+                codeBuilder.append("val ${property.name} = ArrayList<${property.type + to}>()").appendLine()
+                codeBuilder.append("$source.${property.name}!!.forEach {").appendLine()
+                if (property.typeObject is GenericListClass) {
+                    codeBuilder.append(property.typeObject.generic.getFactoryCode("${property.name}Item", "it", from, to)).appendLine()
+                    codeBuilder.append("${property.name}.add(${property.name}Item)").appendLine()
+                } else {
+                    codeBuilder.append("$target.${property.name}.add(it)").appendLine()
+                }
+                codeBuilder.append("}").appendLine()
+                codeBuilder.append("$target.${property.name} = ${property.name}").appendLine()
+            } else {
+                codeBuilder.append(property.typeObject.getFactoryCode("$target.${property.name}", "$source.${property.name}", from, to)).appendLine()
+            }
+            codeBuilder.append("}").appendLine()
+        }
+        return codeBuilder.toString()
+    }
+
     override fun getCode(): String {
         isDataClass = getConfig(CONF_KOTLIN_IS_DATA_CLASS, isDataClass)
         isUseConstructorParameter = getConfig(CONF_KOTLIN_IS_USE_CONSTRUCTOR_PARAMETER, isUseConstructorParameter)

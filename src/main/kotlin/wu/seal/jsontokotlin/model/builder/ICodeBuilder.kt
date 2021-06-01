@@ -27,6 +27,8 @@ interface ICodeBuilder {
      */
     fun getOnlyCurrentCode(): String
 
+    fun getFactoryCode(target: String, source: String, from: String, to: String): String
+
     fun <T> getConfig(key: String, default: T): T {
         return CodeBuilderConfig.instance.getConfig(key, default)
     }

@@ -42,6 +42,11 @@ interface KotlinClass {
      */
     fun getOnlyCurrentCode(): String
 
+    /**
+     * get the code (include referenced classes) string for writing into file or printing out
+     */
+    fun getFactoryCode(target: String, source: String, from: String, to: String): String
+
     fun <T : KotlinClass> applyInterceptors(enabledKotlinClassInterceptors: List<IKotlinClassInterceptor<T>>): KotlinClass = this
 
     fun <T : KotlinClass> applyInterceptor(classInterceptor: IKotlinClassInterceptor<T>): KotlinClass = applyInterceptors(listOf(classInterceptor))

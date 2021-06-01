@@ -84,6 +84,8 @@ class KotlinClassFileGenerator {
         generateFordClasses(kotlinClass, project, psiFileFactory, directory, "repository/response", "Response")
         generateFordClasses(kotlinClass, project, psiFileFactory, directory, "domain", "Entity")
         generateFordClasses(kotlinClass, project, psiFileFactory, directory, "component/models", "DTO")
+        generateFordFactoryFunction(kotlinClass, project, psiFileFactory, directory, "Response", "Entity")
+//        generateFordFactoryFunction(kotlinClass, project, psiFileFactory, directory, "Entity", "DTO")
         val notifyMessage = "Kotlin Data Class file generated successful"
         showNotify(notifyMessage, project)
     }
@@ -144,6 +146,41 @@ class KotlinClassFileGenerator {
             project,
             psiFileFactory,
             subDirectory
+        )
+    }
+
+    private fun generateFordFactoryFunction(
+        kotlinClass: KotlinClass,
+        project: Project?,
+        psiFileFactory: PsiFileFactory,
+        directory: PsiDirectory,
+        from: String,
+        to: String
+    ) {
+        val directoryFactory = PsiDirectoryFactory.getInstance(directory.project)
+
+        val renamedKotlinClass = makeProgressiveName(kotlinClass)
+        val packageName = directoryFactory.getQualifiedName(directory, false)
+        val packageDeclare = if (packageName.isNotEmpty()) "package $packageName" else ""
+        val fileNamesWithoutSuffix = currentDirExistsFileNamesWithoutKTSuffix(directory)
+        var kotlinClassForGenerateFile = renamedKotlinClass
+        while (fileNamesWithoutSuffix.contains(renamedKotlinClass.name)) {
+            kotlinClassForGenerateFile =
+                kotlinClassForGenerateFile.rename(newName = kotlinClassForGenerateFile.name + "X")
+        }
+
+        val factoryCodeContentSb = StringBuilder()
+        factoryCodeContentSb.append("fun factory(${from.toLowerCase()}: ${renamedKotlinClass.name + from}): ${renamedKotlinClass.name + to} {").appendLine()
+        factoryCodeContentSb.append(renamedKotlinClass.getFactoryCode(to.toLowerCase(), from.toLowerCase(), from, to)).appendLine()
+        factoryCodeContentSb.append("}").appendLine()
+
+        generateKotlinClassFile(
+            kotlinClassForGenerateFile.name + to,
+            packageDeclare,
+            factoryCodeContentSb.toString(),
+            project,
+            psiFileFactory,
+            directory
         )
     }
 

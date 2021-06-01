@@ -46,6 +46,10 @@ data class SealedClass(
         }
     }
 
+    override fun getFactoryCode(target: String, source: String, from: String, to: String): String {
+        TODO("Not yet implemented")
+    }
+
     override fun replaceReferencedClasses(replaceRule: Map<KotlinClass, KotlinClass>): KotlinClass {
         TODO("Not yet implemented")
     }
